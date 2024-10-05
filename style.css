@@ -1,13 +1,12 @@
 body {
-    background: linear-gradient(45deg, #000000, #242424, #181717, #000000);
+    background: linear-gradient(45deg, #1f1e1e, #343510, #181717, #153a1f);
     animation: gradientAnimation 15s ease infinite;
     margin: 0;
-    background-color: rgb(34, 34, 33);
     width: 100%;
+    height: 100vh; /* Ensures the body takes full height */
     font-family: Arial, Helvetica, sans-serif;
     font-size: 2rem;
     background-size: 400% 400%;
-    
 }
 
 @keyframes gradientAnimation {
@@ -21,5 +20,66 @@ body {
     left: 50%;
     margin-top: 5%;
     transform: translateX(-50%);
-    color: black;
+    color: rgb(7, 173, 62);
+    font-size: 4rem;
+}
+
+#info {
+    color: rgb(7, 167, 60);
+    position: absolute;
+    left: 50%;
+    top: calc(10% + 3em); 
+    transform: translateX(-50%);
+    padding-top: 5%;
+    font-size: 0.5em;
+}
+
+.data-heading {
+    position: absolute;
+    left: 50%;
+    top: calc(20% + 3em); 
+    transform: translateX(-50%);
+    padding-top: 5%;
+    color: rgb(7, 177, 63);
+}
+
+#nothing {
+    position: absolute;
+    left: 50%;
+    top: calc(40% + 3em); 
+    transform: translateX(-50%);
+    padding-top: 5%;
+    color: rgb(7, 189, 67);
+    opacity: 0; /* Start fully transparent */
+    animation: fadeIn 2s forwards; /* Animate with fadeIn over 2 seconds */
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1; /* End fully opaque */
+    }
+}
+
+.get-data {
+    background-color: rgb(104, 2, 2);
+    font-size: 0.9rem;
+    border-radius: 10px;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    position: absolute;
+    left: 50%;
+    top: calc(80% + 3em); 
+    transform: translateX(-50%);
+    height: 9%;
+    width: 9%;
+    
+}
+
+#copyright {
+    position: absolute;
+    left: 9%;
+    bottom: 0;
+    transform: translateX(-50%);
+    color: white; 
+    font-size: 40%; 
+    text-align: center; 
 }
