@@ -1,38 +1,29 @@
-# Specify the path to the log file
+# Specify the path to the log files
 $logFileArray = @(
-    "C:\Users\Admin\Onedrive\Documents\CS-474\Individual Project\Geolocator\Log Files\access_log_20241003-101534.log",
-    "C:\Users\Admin\Onedrive\Documents\CS-474\Individual Project\Geolocator\Log Files\access_log_20241003-162755.log",
-    "C:\Users\Admin\Onedrive\Documents\CS-474\Individual Project\Geolocator\Log Files\access_log_20241003-162807.log",
-    "C:\Users\Admin\Onedrive\Documents\CS-474\Individual Project\Geolocator\Log Files\access_log_20241003-162814.log",
-    "C:\Users\Admin\Onedrive\Documents\CS-474\Individual Project\Geolocator\Log Files\access_log_20241003-162829.log",
-    "C:\Users\Admin\Onedrive\Documents\CS-474\Individual Project\Geolocator\Log Files\access_log_20241003-162831.log"
+    "C:\Users\Admin\OneDrive\Documents\CS-474\Individual Project\Geolocator\Log Files\access_log_20241003-101534.log",
+    "C:\Users\Admin\OneDrive\Documents\CS-474\Individual Project\Geolocator\Log Files\access_log_20241003-162755.log",
+    "C:\Users\Admin\OneDrive\Documents\CS-474\Individual Project\Geolocator\Log Files\access_log_20241003-162807.log",  
+    "C:\Users\Admin\OneDrive\Documents\CS-474\Individual Project\Geolocator\Log Files\access_log_20241003-162814.log",
+    "C:\Users\Admin\OneDrive\Documents\CS-474\Individual Project\Geolocator\Log Files\access_log_20241003-162829.log",
+    "C:\Users\Admin\OneDrive\Documents\CS-474\Individual Project\Geolocator\Log Files\access_log_20241003-162831.log"
 )
 
 # Select a random file from the array of log files
 $randomLogFile = Get-Random -InputObject $logFileArray
 
-# # Check if the log file exists
-# if (-Not (Test-Path $randomLogFile)) {
-#     Write-Host "Log file not found: $randomLogFile"
-#     exit
-# }
-
-# Regular expression to parse the log entry
-$logPattern = '^(?<ip>\d+\.\d+\.\d+\.\d+)\s-\s-\s\[(?<datetime>.+?)\]\s"(?<request_type>\w+)\s(?<request_resource>.*?)\sHTTP\/\d\.\d"\s(?<http_response_code>\d+)\s(?<object_size>\d+)\s"(?<referrer>.*?)"\s"(?<user_agent>.*?)"$'
-
-# API endpoint (you can replace it with your choice of GeoIP API)
-$ipInfoApiUrl = "https://ipinfo.io/{0}/json"
-
-# Create a list to hold the parsed data
-$parsedData = @()
+# Define the log pattern using regex
+$logPattern = '^(?<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) - - \[(?<datetime>[^\]]+)\] "(?<request_type>\w+) (?<request_resource>[^ ]+) HTTP[^"]*" (?<http_response_code>\d{3}) (?<object_size>\d+) "(?<referrer>[^"]*)" "(?<user_agent>[^"]*)"' 
 
 # Read the log file line by line
-Get-Content $randomLogFile | ForEach-Object {
-    $logEntry = $_
+$logEntries = Get-Content $randomLogFile
 
-    # Match the log entry against the pattern
+# Initialize an array to store parsed data
+$parsedData = @()
+$ipAddresses = @()  # Array to store unique IP addresses
+
+foreach ($logEntry in $logEntries) { 
     if ($logEntry -match $logPattern) {
-        # Extracting the parsed values using named captures
+        # Extract fields using named captures
         $ipAddress = $matches['ip']
         $datetime = $matches['datetime']
         $requestType = $matches['request_type']
@@ -42,15 +33,12 @@ Get-Content $randomLogFile | ForEach-Object {
         $referrer = $matches['referrer']
         $userAgent = $matches['user_agent']
 
-        # Get GeoIP information
-        $geoIpResponse = Invoke-RestMethod -Uri ($ipInfoApiUrl -f $ipAddress)
-        $country = $geoIpResponse.country
-        $city = $geoIpResponse.city
-        $region = $geoIpResponse.region
-        $location = $geoIpResponse.loc
-        $postal = $geoIpResponse.postal
+        # Collect unique IP addresses
+        if (-not $ipAddresses.Contains($ipAddress)) {
+            $ipAddresses += $ipAddress
+        }
 
-        # sets up the list of data for insertion
+        # Store the log entry in a hashtable
         $entry = @{
             IPAddress        = $ipAddress
             DateTime         = $datetime
@@ -60,33 +48,47 @@ Get-Content $randomLogFile | ForEach-Object {
             ObjectSize       = $objectSize
             Referrer         = $referrer
             UserAgent        = $userAgent
-            Country          = $country
-            City             = $city
-            Region           = $region
-            Location         = $location
-            Postal           = $postal
         }
 
-        # Add to the list of data
+        # Add to the list of parsed data
         $parsedData += $entry
     }
     else {
-        Write-Host "No match found for entry: $logEntry"
+        Write-Host "No match found for log entry: $logEntry"
     }
 }
 
-# Output parsed data for verification (Debug check)
-$parsedData | Format-Table -AutoSize
+# Prepare the batch request for ip-api
+$apiUrl = "http://ip-api.com/batch"
+$ipList = $ipAddresses | ForEach-Object { @{ query = $_ } }  # Create a JSON array for the batch request
 
+# Make the batch request
+try {
+    $apiResponse = Invoke-RestMethod -Uri $apiUrl -Method Post -Body ($ipList | ConvertTo-Json) -ContentType 'application/json'
+    
+    # Validate API response and extract fields
+    foreach ($response in $apiResponse) {
+        $ip = $response.query
+        $country = if ($response.country) { $response.country } else { "N/A" }
+        $city = if ($response.city) { $response.city } else { "N/A" }
+        $region = if ($response.region) { $response.region } else { "N/A" }
+        $location = if ($response.lat -and $response.lon) { "$($response.lat), $($response.lon)" } else { "N/A" }
+        $postal = if ($response.zip) { $response.zip } else { "N/A" }
 
-# MySQL connection parameters
-$connectionString = "Server=localhost; Database=; User ID=Eliyah2003; Password=Eliyah21!!; "
-
-# Insert each entry into the database
-$parsedData | ForEach-Object {
-    $query = "INSERT INTO log_query (ip_address, city, region, loc, postal_code) VALUES ('$($_.IP)', '$($_.City)', '$($_.Region)', '$($_.Location)', '$($_.Postal)')"
-    # $displayQuery = "SELECT * FROM log_query"
-    # Execute the query
-    Invoke-Sqlcmd -Query $query -ConnectionString $connectionString
-    # Invoke-Sqlcmd -Query $displayQuery -ConnectionString $connectionString
+        # Find corresponding parsed data entry
+        $entry = $parsedData | Where-Object { $_.IPAddress -eq $ip }
+        if ($entry) {
+            $entry.Country = $country
+            $entry.City = $city
+            $entry.Region = $region
+            $entry.Location = $location
+            $entry.Postal = $postal
+        }
+    }
 }
+catch {
+    Write-Host "Error fetching GeoIP information: $_"
+}
+
+# Output the merged parsed data
+$parsedData | Format-Table -AutoSize
