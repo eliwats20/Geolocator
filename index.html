@@ -13,14 +13,20 @@
       of charge, no user account needed.)
     </h2>
     <h2 class="data-heading">Data Visuals 📊</h2>
-    <p id="nothing">
-      Nothing yet. Please press "Get Data"</p>
-    <button class = "get-data">Get Data</button>
-    <footer id="copyright">
-      © 2024 Eliyah Watson. All rights reserved.
-    </footer>
+    <button class="get-data" id="submitData" onclick="gotoData()">
+      Get Data
+    </button>
+    <div id="responseContainer">
+      <span id="responseMessage">Nothing yet. Please press "Get Data"</span>
+    </div>
+    <div id="graphs">
+      <img id="graph1" alt="Graph 1" style="display: none" />
+      <img id="graph2" alt="Graph 2" style="display: none" />
+      <img id="graph3" alt="Graph 3" style="display: none" />
+      <button class="delete-data" style="display: none">Delete Data</button>
+    </div>
 
-      <script src="script.js"></script>
-    </p>
+    <footer id="copyright">© 2024 Eliyah Watson. All rights reserved.</footer>
+    <script src="script.js"></script>
   </body>
 </html>

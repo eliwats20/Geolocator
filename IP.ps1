@@ -1,21 +1,18 @@
-# Specify the path to the log files
-$logFileArray = @(
-    "C:\Users\Admin\OneDrive\Documents\CS-474\Individual Project\Geolocator\Log Files\access_log_20241003-101534.log",
-    "C:\Users\Admin\OneDrive\Documents\CS-474\Individual Project\Geolocator\Log Files\access_log_20241003-162755.log",
-    "C:\Users\Admin\OneDrive\Documents\CS-474\Individual Project\Geolocator\Log Files\access_log_20241003-162807.log",  
-    "C:\Users\Admin\OneDrive\Documents\CS-474\Individual Project\Geolocator\Log Files\access_log_20241003-162814.log",
-    "C:\Users\Admin\OneDrive\Documents\CS-474\Individual Project\Geolocator\Log Files\access_log_20241003-162829.log",
-    "C:\Users\Admin\OneDrive\Documents\CS-474\Individual Project\Geolocator\Log Files\access_log_20241003-162831.log"
-)
-
-# Select a random file from the array of log files
-$randomLogFile = Get-Random -InputObject $logFileArray
-
 # Define the log pattern using regex
 $logPattern = '^(?<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) - - \[(?<datetime>[^\]]+)\] "(?<request_type>\w+) (?<request_resource>[^ ]+) HTTP[^"]*" (?<http_response_code>\d{3}) (?<object_size>\d+) "(?<referrer>[^"]*)" "(?<user_agent>[^"]*)"' 
 
+# Create an array that defines OS types for User Agent
+$osTypes = @(
+    @{ OS = "Windows"; Pattern = "Windows" },
+    @{ OS = "macOS"; Pattern = "Mac OS|Macintosh" },
+    @{ OS = "Linux"; Pattern = "Linux|X11" },
+    @{ OS = "Android"; Pattern = "Android" },
+    @{ OS = "iOS"; Pattern = "iPhone|iPad" }
+)
+
+$logFile = "C:\Users\Admin\OneDrive\Documents\CS-474\Individual Project\Geolocator\Log Files\access_log_20241024-151153.log"
 # Read the log file line by line
-$logEntries = Get-Content $randomLogFile
+$logEntries = Get-Content $logFile
 
 # Initialize an array to store parsed data
 $parsedData = @()
@@ -25,13 +22,37 @@ foreach ($logEntry in $logEntries) {
     if ($logEntry -match $logPattern) {
         # Extract fields using named captures
         $ipAddress = $matches['ip']
-        $datetime = $matches['datetime']
+        $datetime = $matches['datetime'] -replace '\s-\d{4}$'
+
+        $datetimeFormatted = ($datetime -replace '\s-\d{4}$').Trim() -replace '(\d{2})/(\w{3})/(\d{4}):(\d{2}:\d{2}:\d{2})', '$3-$1-$2 $4'
+        
+        try {
+            $queryDate = Get-Date $datetimeFormatted -Format "yyyy-MM-dd"
+            $queryTime = Get-Date $datetimeFormatted -Format "HH:mm:ss"
+        }
+        catch {
+            Write-Host "Failed to parse date/time: $_"
+            continue  # Skip to the next log entry
+        }
+        
+
         $requestType = $matches['request_type']
         $requestResource = $matches['request_resource']
         $httpResponseCode = $matches['http_response_code']
         $objectSize = $matches['object_size']
         $referrer = $matches['referrer']
         $userAgent = $matches['user_agent']
+
+
+
+        $detectedOS = "Unknown"
+
+        foreach ($os in $osTypes) {
+            if ($userAgent -match $os.Pattern) {
+                $detectedOS = $os.OS
+                break
+            }
+        }
 
         # Collect unique IP addresses
         if (-not $ipAddresses.Contains($ipAddress)) {
@@ -41,13 +62,14 @@ foreach ($logEntry in $logEntries) {
         # Store the log entry in a hashtable
         $entry = @{
             IPAddress        = $ipAddress
-            DateTime         = $datetime
+            QueryDate        = $queryDate   
+            QueryTime        = $queryTime
             RequestType      = $requestType
             RequestResource  = $requestResource
             HTTPResponseCode = $httpResponseCode
             ObjectSize       = $objectSize
             Referrer         = $referrer
-            UserAgent        = $userAgent
+            UserAgent        = $detectedOS
         }
 
         # Add to the list of parsed data
@@ -60,7 +82,7 @@ foreach ($logEntry in $logEntries) {
 
 # Prepare the batch request for ip-api
 $apiUrl = "http://ip-api.com/batch"
-$ipList = $ipAddresses | ForEach-Object { @{ query = $_ } }  # Create a JSON array for the batch request
+$ipList = $ipAddresses
 
 # Make the batch request
 try {
@@ -90,5 +112,9 @@ catch {
     Write-Host "Error fetching GeoIP information: $_"
 }
 
-# Output the merged parsed data
-$parsedData | Format-Table -AutoSize
+# Output the merged parsed data as JSON
+
+$jsonOutput = $parsedData | ConvertTo-Json
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+Write-Output $jsonOutput
+
