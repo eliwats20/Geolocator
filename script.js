@@ -59,15 +59,13 @@ async function fetchGraphs() {
     const graphsDiv = document.getElementById("graphs");
     graphsDiv.innerHTML = ''; // Clear existing content
 
-    const timestamp = new Date().getTime(); // Current timestamp in milliseconds
-
 
     // Use relative paths for graph images
     const graphPaths = [
-        `./requests_by_country.png?timestamp=${timestamp}`,
-        `./requests_by_day_of_month_line.png?timestamp=${timestamp}`,
-        `./requests_by_day_of_week.png?timestamp=${timestamp}`,
-        `./requests_by_time_of_day.png?timestamp=${timestamp}`
+        `./requests_by_country.png`,
+        `./requests_by_day_of_month_line.png`,
+        `./requests_by_time_of_day.png`,
+        `./requests_by_day_of_week.png`,
     ];
 
     graphPaths.forEach(path => {
@@ -76,7 +74,6 @@ async function fetchGraphs() {
         img.alt = "Graph Image";
         graphsDiv.appendChild(img);
     });
-    console.log("Graphs fetched and added to the DOM"); // Add this line
 }
 
 async function deleteData() {

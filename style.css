@@ -3,7 +3,7 @@ body {
     animation: gradientAnimation 15s ease infinite;
     margin: 0;
     width: 100%;
-    height: 100vh; /* Ensures the body takes full height */
+    height: 100vh;
     font-family: Arial, Helvetica, sans-serif;
     font-size: 2rem;
     background-size: 400% 400%;
@@ -50,13 +50,13 @@ body {
     transform: translateX(-50%);
     padding-top: 5%;
     color: rgb(7, 189, 67);
-    opacity: 0; /* Start fully transparent */
-    animation: fadeIn 2s forwards; /* Animate with fadeIn over 2 seconds */
+    opacity: 0; 
+    animation: fadeIn 2s forwards; 
 }
 
 @keyframes fadeIn {
     to {
-        opacity: 1; /* End fully opaque */
+        opacity: 1; 
     }
 }
 
@@ -76,53 +76,48 @@ body {
 }
 
 
-/* Style for response message */
 #responseMessage {
     position: absolute;
     left: 50%;
-    top: calc(40% + 3em); /* Adjust to desired vertical position */
+    top: calc(40% + 3em); 
     transform: translateX(-50%);
-    padding: 1em; /* Add some padding for visual appeal */
+    padding: 1em; 
     color: rgb(7, 177, 63);
 }
 
 #graphs {
-    position: relative; /* Keep this relative */
+    position: relative;
     left: 50%;
     top: calc(60% + 3em);
     transform: translateX(-50%);
     display: flex;
-    flex-direction: column; /* Stack graphs vertically */
-    align-items: center; /* Centers graphs horizontally */
-    gap: 100px; /* Space between each graph */
+    flex-direction: column; 
+    align-items: center; 
+    gap: 100px; 
 }
 
 #graphs img {
-    display: block; /* Ensure images display as block elements */
-    height: 700px; /* Makes the graphs responsive */
-    width: 900px; /* Maintains aspect ratio */
+    display: block; 
+    height: 800px; 
+    width: 800px; 
 }
 
-/* Optional: Ensure #graphs starts off hidden */
 #graphs {
-    display: none; /* Initially hide graphs until they are loaded */
+    display: none;
 }
 
 
 .delete-data {
-    display: none; /* Initially hidden, shown only when needed */
+    display: none; 
     background-color: rgb(114, 0, 0);
     color: white;
     font-size: 0.9rem;
     border-radius: 10px;
     font-family: Verdana, Geneva, Tahoma, sans-serif;
-    padding: 10px 20px; /* Adjust padding as needed for sizing */
-    margin-top: 700px; /* Space between the graphs and the button */
+    padding: 10px 20px; 
+    margin-top: 700px; 
     height: 9%;
     width: 9%;
-
-
-    /* Center the button */
     position: relative;
     left: 50%;
     transform: translateX(-50%);
@@ -136,12 +131,12 @@ body {
 
 
 .delete-data:hover {
-    background-color: rgb(100, 0, 0); /* Darker shade on hover */
+    background-color: rgb(100, 0, 0); 
 }
 
 #copyright {
-    position: fixed; /* Change to fixed */
-    bottom: 0; /* Stick to the bottom of the viewport */
+    position: fixed; 
+    bottom: 0;
     transform: translateX(-50%);
     width: 100%;
     color: white; 

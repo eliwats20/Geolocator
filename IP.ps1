@@ -1,16 +1,5 @@
-# Creates array of synthetic IP data log files
-$logFileArray = @(
-    "C:\Users\Admin\OneDrive\Documents\CS-474\Individual Project\Geolocator\Log Files\access_log_20241024-151153.log",
-    "C:\Users\Admin\OneDrive\Documents\CS-474\Individual Project\Geolocator\Log Files\access_log_20241027-230127.log",
-    "C:\Users\Admin\OneDrive\Documents\CS-474\Individual Project\Geolocator\Log Files\access_log_20241027-230143.log",
-    "C:\Users\Admin\OneDrive\Documents\CS-474\Individual Project\Geolocator\Log Files\access_log_20241027-230150.log",
-    "C:\Users\Admin\OneDrive\Documents\CS-474\Individual Project\Geolocator\Log Files\access_log_20241027-230153.log",
-    "C:\Users\Admin\OneDrive\Documents\CS-474\Individual Project\Geolocator\Log Files\access_log_20241027-230156.log",
-    "C:\Users\Admin\OneDrive\Documents\CS-474\Individual Project\Geolocator\Log Files\access_log_20241101-112531.log"
-)
-
-# Select a random log file from the array
-$logFile = Get-Random -InputObject $logFileArray
+# Select log file 
+$logFile = "C:\Users\Admin\OneDrive\Documents\CS-474\Individual Project\Geolocator\Log Files\access_log_20241027-230150.log"
 
 # Define the log pattern using regex expression
 $logPattern = '^(?<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) - - \[(?<datetime>[^\]]+)\] "(?<request_type>\w+) (?<request_resource>[^ ]+) HTTP[^"]+" (?<http_response_code>\d{3}) (?<object_size>\d+) "(?<referrer>[^"]*)" "(?<user_agent>[^"]+)"';

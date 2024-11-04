@@ -148,7 +148,7 @@ plot_time <- ggplot(requests_by_time, aes(x = time_category, y = Requests, fill 
     panel.background = element_rect(fill = "white"),
     panel.grid.major = element_line(color = "gray"),
     axis.text = element_text(color = "black", size = 15),
-    axis.title = element_text(color = "black", size = 15, face = "bold"),
+    axis.title = element_text(color = "black", size = 25, face = "bold"),
     plot.title = element_text(color = "black", size = 30, hjust = 0.5, face = "bold")
   ) +
   labs(title = paste("Requests by Time of Day from", format(start_date, "%B %d"), "to", format(end_date, "%B %d")), x = "Time of Day", y = "Number of Requests") +
@@ -179,7 +179,7 @@ plot_day_of_week <- ggplot(requests_by_day_of_week, aes(x = day_of_week, y = Req
     panel.background = element_rect(fill = "white"),
     panel.grid.major = element_line(color = "gray"),
     axis.text = element_text(color = "black", size = 15),
-    axis.title = element_text(color = "black", size = 15, face = "bold"),
+    axis.title = element_text(color = "black", size = 25, face = "bold"),
     plot.title = element_text(color = "black", size = 30, hjust = 0.5, face = "bold")
   ) +
   labs(title = paste("Requests by Day of Week from", format(start_date, "%B %d"), "to", format(end_date, "%B %d")), x = "Day of Week", y = "Number of Requests")
