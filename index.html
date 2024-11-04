@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Geolocator</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
+    <section id="top"></section>
     <h1 id="title">Geolocator 📍</h1>
     <h2 id="info">
       Find information about IPv4 Addresses across the world! (Completely free
@@ -23,8 +23,10 @@
       <img id="graph1" alt="Graph 1" style="display: none" />
       <img id="graph2" alt="Graph 2" style="display: none" />
       <img id="graph3" alt="Graph 3" style="display: none" />
-      <button class="delete-data" style="display: none">Delete Data</button>
     </div>
+    <button class="delete-data" style="display: none" onclick="deleteData()">
+      Delete Data
+    </button>
 
     <footer id="copyright">© 2024 Eliyah Watson. All rights reserved.</footer>
     <script src="script.js"></script>

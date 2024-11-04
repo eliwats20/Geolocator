@@ -84,49 +84,67 @@ body {
     transform: translateX(-50%);
     padding: 1em; /* Add some padding for visual appeal */
     color: rgb(7, 177, 63);
-    z-index: 10; /* Ensure it appears above other content */
 }
 
 #graphs {
-    position: absolute;
+    position: relative; /* Keep this relative */
     left: 50%;
-    top: calc(60% + 3em); 
+    top: calc(60% + 3em);
     transform: translateX(-50%);
     display: flex;
     flex-direction: column; /* Stack graphs vertically */
     align-items: center; /* Centers graphs horizontally */
-    gap: 50px; /* Adds space between each graph */
+    gap: 100px; /* Space between each graph */
 }
 
 #graphs img {
-    max-width: 800px; /* Controls the size of each graph */
-    width: 100%; /* Makes the graphs responsive */
-    height: auto; /* Maintains aspect ratio */
+    display: block; /* Ensure images display as block elements */
+    height: 700px; /* Makes the graphs responsive */
+    width: 900px; /* Maintains aspect ratio */
 }
 
+/* Optional: Ensure #graphs starts off hidden */
+#graphs {
+    display: none; /* Initially hide graphs until they are loaded */
+}
+
+
 .delete-data {
-    background-color: rgb(143, 3, 3); /* Example color for delete button */
+    display: none; /* Initially hidden, shown only when needed */
+    background-color: rgb(114, 0, 0);
     color: white;
     font-size: 0.9rem;
     border-radius: 10px;
     font-family: Verdana, Geneva, Tahoma, sans-serif;
-    display: none; /* Initially hidden */
-    margin-top: 20px; /* Space above the button */
-    padding: 0.5em 1em; /* Add padding for a better button size */
-    cursor: pointer; /* Change cursor to pointer on hover */
-    transition: background-color 0.3s; /* Smooth transition for background color */
+    padding: 10px 20px; /* Adjust padding as needed for sizing */
+    margin-top: 700px; /* Space between the graphs and the button */
+    height: 9%;
+    width: 9%;
+
+
+    /* Center the button */
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
 }
+
+
+/* Show the button when needed */
+.delete-data.show {
+    display: block; /* Make it visible */
+}
+
 
 .delete-data:hover {
     background-color: rgb(100, 0, 0); /* Darker shade on hover */
 }
 
 #copyright {
-    position: absolute;
-    left: 9%;
-    margin-top: 100%;
+    position: fixed; /* Change to fixed */
+    bottom: 0; /* Stick to the bottom of the viewport */
     transform: translateX(-50%);
+    width: 100%;
     color: white; 
-    font-size: 40%; 
-    text-align: center; 
-}
+    font-size: 40%;
+}  
+

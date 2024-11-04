@@ -1,7 +1,21 @@
-# Define the log pattern using regex
-$logPattern = '^(?<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) - - \[(?<datetime>[^\]]+)\] "(?<request_type>\w+) (?<request_resource>[^ ]+) HTTP[^"]*" (?<http_response_code>\d{3}) (?<object_size>\d+) "(?<referrer>[^"]*)" "(?<user_agent>[^"]*)"' 
+# Creates array of synthetic IP data log files
+$logFileArray = @(
+    "C:\Users\Admin\OneDrive\Documents\CS-474\Individual Project\Geolocator\Log Files\access_log_20241024-151153.log",
+    "C:\Users\Admin\OneDrive\Documents\CS-474\Individual Project\Geolocator\Log Files\access_log_20241027-230127.log",
+    "C:\Users\Admin\OneDrive\Documents\CS-474\Individual Project\Geolocator\Log Files\access_log_20241027-230143.log",
+    "C:\Users\Admin\OneDrive\Documents\CS-474\Individual Project\Geolocator\Log Files\access_log_20241027-230150.log",
+    "C:\Users\Admin\OneDrive\Documents\CS-474\Individual Project\Geolocator\Log Files\access_log_20241027-230153.log",
+    "C:\Users\Admin\OneDrive\Documents\CS-474\Individual Project\Geolocator\Log Files\access_log_20241027-230156.log",
+    "C:\Users\Admin\OneDrive\Documents\CS-474\Individual Project\Geolocator\Log Files\access_log_20241101-112531.log"
+)
 
-# Create an array that defines OS types for User Agent
+# Select a random log file from the array
+$logFile = Get-Random -InputObject $logFileArray
+
+# Define the log pattern using regex expression
+$logPattern = '^(?<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) - - \[(?<datetime>[^\]]+)\] "(?<request_type>\w+) (?<request_resource>[^ ]+) HTTP[^"]+" (?<http_response_code>\d{3}) (?<object_size>\d+) "(?<referrer>[^"]*)" "(?<user_agent>[^"]+)"';
+
+# Create an array of hashtables to match OS types from patterns
 $osTypes = @(
     @{ OS = "Windows"; Pattern = "Windows" },
     @{ OS = "macOS"; Pattern = "Mac OS|Macintosh" },
@@ -10,32 +24,30 @@ $osTypes = @(
     @{ OS = "iOS"; Pattern = "iPhone|iPad" }
 )
 
-$logFile = "C:\Users\Admin\OneDrive\Documents\CS-474\Individual Project\Geolocator\Log Files\access_log_20241024-151153.log"
-# Read the log file line by line
+
+# Read log file line by line
 $logEntries = Get-Content $logFile
 
-# Initialize an array to store parsed data
+# Array to store parsed data from API
 $parsedData = @()
-$ipAddresses = @()  # Array to store unique IP addresses
+
+# Array to store IP addresses
+$ipAddresses = @() 
 
 foreach ($logEntry in $logEntries) { 
+    # Checks if each line in log file matches regex pattern
     if ($logEntry -match $logPattern) {
         # Extract fields using named captures
         $ipAddress = $matches['ip']
-        $datetime = $matches['datetime'] -replace '\s-\d{4}$'
+        $datetime = $matches['datetime']
 
-        $datetimeFormatted = ($datetime -replace '\s-\d{4}$').Trim() -replace '(\d{2})/(\w{3})/(\d{4}):(\d{2}:\d{2}:\d{2})', '$3-$1-$2 $4'
-        
-        try {
-            $queryDate = Get-Date $datetimeFormatted -Format "yyyy-MM-dd"
-            $queryTime = Get-Date $datetimeFormatted -Format "HH:mm:ss"
-        }
-        catch {
-            Write-Host "Failed to parse date/time: $_"
-            continue  # Skip to the next log entry
-        }
-        
+        # Reformat date and time
+        $datetimeFormatted = $datetime.Trim() -replace '(\d{2})/(\w{3})/(\d{4}):(\d{2}:\d{2}:\d{2})', '$3-$1-$2 $4'
 
+        # Get date format from cmdlet to recognize user-defined format
+        $queryDate = Get-Date $datetimeFormatted -Format "yyyy-MM-dd"
+        $queryTime = Get-Date $datetimeFormatted -Format "HH:mm:ss"
+        
         $requestType = $matches['request_type']
         $requestResource = $matches['request_resource']
         $httpResponseCode = $matches['http_response_code']
@@ -44,22 +56,19 @@ foreach ($logEntry in $logEntries) {
         $userAgent = $matches['user_agent']
 
 
-
-        $detectedOS = "Unknown"
-
+        # Iterate through the list of OS types to check for a match
         foreach ($os in $osTypes) {
+            # If the user agent matches the current OS pattern
             if ($userAgent -match $os.Pattern) {
+                # Assign the detected operating system to the variable                
                 $detectedOS = $os.OS
                 break
             }
         }
 
-        # Collect unique IP addresses
-        if (-not $ipAddresses.Contains($ipAddress)) {
-            $ipAddresses += $ipAddress
-        }
-
-        # Store the log entry in a hashtable
+        $ipAddresses += $ipAddress
+        
+        # Store un-parsed log entry in a hashtable
         $entry = @{
             IPAddress        = $ipAddress
             QueryDate        = $queryDate   
@@ -94,7 +103,8 @@ try {
         $country = if ($response.country) { $response.country } else { "N/A" }
         $city = if ($response.city) { $response.city } else { "N/A" }
         $region = if ($response.region) { $response.region } else { "N/A" }
-        $location = if ($response.lat -and $response.lon) { "$($response.lat), $($response.lon)" } else { "N/A" }
+        $latitude = if ($response.lat) { $response.lat } else { "N/A" }
+        $longitude = if ($response.lon) { $response.lon }  else { "N/A" }
         $postal = if ($response.zip) { $response.zip } else { "N/A" }
 
         # Find corresponding parsed data entry
@@ -103,17 +113,17 @@ try {
             $entry.Country = $country
             $entry.City = $city
             $entry.Region = $region
-            $entry.Location = $location
+            $entry.Latitude = $latitude
+            $entry.Longitude = $longitude
             $entry.Postal = $postal
         }
     }
 }
 catch {
-    Write-Host "Error fetching GeoIP information: $_"
+    Write-Host "Error fetching IP-API information: $_"
 }
 
 # Output the merged parsed data as JSON
-
 $jsonOutput = $parsedData | ConvertTo-Json
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 Write-Output $jsonOutput
